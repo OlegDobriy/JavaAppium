@@ -1,8 +1,8 @@
 package lib.ui;
 
-import io.appium.java_client.AppiumDriver;
 import org.openqa.selenium.WebElement;
 import lib.Platform;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
 abstract public class ArticlePageObject extends MainPageObject
 {
@@ -11,6 +11,7 @@ abstract public class ArticlePageObject extends MainPageObject
     FOOTER,
     OPTIONS_BUTTON,
     ADD_TO_LIST_BUTTON,
+    REMOVE_FROM_LIST_BUTTON,
     EXISTED_LIST_TPL,
     OK_ONBOARDING_BUTTON,
     MY_LIST_NAME_FIELD,
@@ -25,7 +26,7 @@ abstract public class ArticlePageObject extends MainPageObject
     }
 
 
-    public ArticlePageObject(AppiumDriver driver)
+    public ArticlePageObject(RemoteWebDriver driver)
     {
         super(driver);
     }
@@ -40,12 +41,17 @@ abstract public class ArticlePageObject extends MainPageObject
 
     public String getArticleTitle()
     {
-        if (Platform.getInstance().isAndroid()) {
+        if (Platform.getInstance().isAndroid())
+        {
             return waitForTitleElement().getAttribute("text");
+        }
+        else if (Platform.getInstance().isIOS())
+        {
+            return waitForTitleElement().getAttribute("name");
         }
         else
         {
-            return waitForTitleElement().getAttribute("name");
+            return waitForTitleElement().getText();
         }
     }
 
@@ -56,9 +62,13 @@ abstract public class ArticlePageObject extends MainPageObject
         {
             this.swipeUpToFindElement(FOOTER, "Cannot swipe to the footer using 50 swipes", 50);
         }
-        else
+        else if (Platform.getInstance().isIOS())
         {
             this.swipeUpTillElementAppears(FOOTER, "Cannot swipe to the footer using 50 swipes", 50);
+        }
+        else
+        {
+            this.scrollWebPageUpTillElementNotVisible(FOOTER, "Cannot scroll to the footer using 50 swipes", 50);
         }
     }
 
@@ -127,12 +137,20 @@ abstract public class ArticlePageObject extends MainPageObject
     }
 
 
-    public void closeArticle ()
+    public void closeArticle()
     {
-        this.waitForElementAndClick(
-                CLOSE_ARTICLE_BUTTON,
-                "Cannot find the 'Close' button"
-        );
+        if (Platform.getInstance().isIOS() || Platform.getInstance().isAndroid())
+        {
+            this.waitForElementAndClick(
+                    CLOSE_ARTICLE_BUTTON,
+                    "Cannot find the 'Close' button"
+            );
+        }
+        else
+        {
+            System.out.println("Method closeArticle() do nothing for platform " + Platform.getInstance().getPlatformVar());
+        }
+
     }
 
 
@@ -155,8 +173,27 @@ abstract public class ArticlePageObject extends MainPageObject
 
     public void addArticleToMyList() throws InterruptedException  // второй раз подсказки уже нет
     {
-        this.checkElementIsMoving(ADD_TO_LIST_BUTTON);
+        if (Platform.getInstance().isMw())
+        {
+            this.removeArticleFromListIfItAdded();
+        }
+
+        if (Platform.getInstance().isIOS() || Platform.getInstance().isAndroid())
+        {
+            this.checkElementIsMoving(ADD_TO_LIST_BUTTON);
+        }
+
         this.waitForElementAndClick(ADD_TO_LIST_BUTTON, "Cannot find 'Add to list' button");
+    }
+
+
+    public void removeArticleFromListIfItAdded()
+    {
+        if (this.isElementPresent(REMOVE_FROM_LIST_BUTTON))
+        {
+            this.waitForElementAndClick(REMOVE_FROM_LIST_BUTTON, "Cannot click to 'Remove from list' button");
+            this.waitForElementPresent(ADD_TO_LIST_BUTTON, "Cannot find 'Add to list' button after removing the article from the list");
+        }
     }
 
 

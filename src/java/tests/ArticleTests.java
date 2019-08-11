@@ -1,6 +1,7 @@
 package tests;
 
 import lib.CoreTestCase;
+import lib.Platform;
 import lib.ui.*;
 import lib.ui.factories.ArticlePageObjectFactory;
 import lib.ui.factories.SearchPageObjectFactory;
@@ -16,7 +17,7 @@ public class ArticleTests extends CoreTestCase
 
 
     @Test
-    public void testFindArticleAndCheckTitle() throws InterruptedException
+    public void testFindArticleAndCheckTitle()
     {
         SearchPageObject SearchPageObject = SearchPageObjectFactory.get(driver);
         SearchPageObject.initSearchInput();
@@ -34,7 +35,7 @@ public class ArticleTests extends CoreTestCase
 
 
     @Test
-    public void testSwipeArticle() throws InterruptedException
+    public void testSwipeArticle()
     {
         String
                 searchRequest = "Enter",
@@ -44,7 +45,14 @@ public class ArticleTests extends CoreTestCase
         SearchPageObject.initSearchInput();
         SearchPageObject.fillSearchField(searchRequest);
         SearchPageObject.waitForSearchResultByTitle(searchRequest);
-        SearchPageObject.waitForSearchResultAndClick(description);
+        if (Platform.getInstance().isMw())
+        {
+            SearchPageObject.waitForSearchResultAndClick(searchRequest);
+        }
+        else
+        {
+            SearchPageObject.waitForSearchResultAndClick(description);
+        }
         ArticlePageObject ArticlePageObject = ArticlePageObjectFactory.get(driver);
         ArticlePageObject.waitForTitleElement();
         ArticlePageObject.swipeToFooter();

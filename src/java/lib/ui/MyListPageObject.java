@@ -1,7 +1,7 @@
 package lib.ui;
 
-import io.appium.java_client.AppiumDriver;
 import lib.Platform;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
 
 abstract public class MyListPageObject extends MainPageObject
@@ -11,6 +11,7 @@ abstract public class MyListPageObject extends MainPageObject
             FOLDER_BY_NAME_TPL,
             ARTICLE_IN_MY_LISTS_BY_NAME_TPL,
             ARTICLE_TITLE_ON_ARTICLE_SCREEN_BY_NAME_TPL,
+            REMOVE_FROM_LIST_BUTTON_TPL,
             SEARCH_BUTTON;
 
 
@@ -26,6 +27,12 @@ abstract public class MyListPageObject extends MainPageObject
         return ARTICLE_IN_MY_LISTS_BY_NAME_TPL.replace("{ARTICLE_TITLE}", articleTitle);
     }
 
+
+    private static String getRemoveButtonByTitle(String articleTitle)
+    {
+        return REMOVE_FROM_LIST_BUTTON_TPL.replace("{ARTICLE_TITLE}", articleTitle);
+    }
+
     private static String getArticleXpathOnArticleScreen(String articleTitle)
     {
         return ARTICLE_TITLE_ON_ARTICLE_SCREEN_BY_NAME_TPL.replace("{ARTICLE_TITLE}", articleTitle);
@@ -34,7 +41,7 @@ abstract public class MyListPageObject extends MainPageObject
     /* TEMPLATE METHODS */
 
 
-    public MyListPageObject(AppiumDriver driver)
+    public MyListPageObject(RemoteWebDriver driver)
     {
         super(driver);
     }
@@ -54,14 +61,29 @@ abstract public class MyListPageObject extends MainPageObject
     {
         this.waitForArticleToAppearInMyLists(articleTitle);
         String articleXpath = getArticleXpathInMyLists(articleTitle);
-        this.swipeElementToLeft(
-                articleXpath,
-                "Cannot find the saved article"
-        );
+
+        if (Platform.getInstance().isIOS() || (Platform.getInstance().isAndroid()))
+        {
+            this.swipeElementToLeft(
+                    articleXpath,
+                    "Cannot find the saved article"
+            );
+        }
+        else {
+            String removeLocator = getRemoveButtonByTitle(articleTitle);
+            this.waitForElementAndClick(removeLocator, "Cannot find 'Remove article from my list' button");
+        }
+
         if (Platform.getInstance().isIOS())
         {
             this.clickElementToTheRightUpperCorner(articleXpath, "Cannot find saved article: " + articleTitle);
         }
+
+        if (Platform.getInstance().isMw())
+        {
+            driver.navigate().refresh();
+        }
+
         this.waitForArticleToDisappearInMyLists(articleTitle);
     }
 

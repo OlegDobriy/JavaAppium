@@ -72,7 +72,7 @@ public class SearchTests extends CoreTestCase
     @Test
     public void testCheckTextBeforeSearch()
     {
-        if (Platform.getInstance().isIOS())
+        if (Platform.getInstance().isIOS() | Platform.getInstance().isMw())
         {
             return;
         }

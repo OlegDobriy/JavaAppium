@@ -17,6 +17,10 @@ public class MyListTests extends CoreTestCase
         super.setUp();
     }
 
+    private static final String
+        login = "",
+        password = "";
+
 
     @Test
     public void testAddFirstArticleToListAndDelete() throws InterruptedException
@@ -30,19 +34,39 @@ public class MyListTests extends CoreTestCase
         SearchPageObject.waitForSearchResultByTitle(searchRequest);
         SearchPageObject.waitForSearchResultAndClick(searchRequest);
         ArticlePageObject ArticlePageObject = ArticlePageObjectFactory.get(driver);
+
         if (Platform.getInstance().isAndroid())
         {
             ArticlePageObject.createListAndAddArticle(folderName);
         }
-        else
+
+        if (Platform.getInstance().isIOS())
         {
             ArticlePageObject.addFirstArticleToMyList();
         }
-        ArticlePageObject.closeArticle();
+
         NavigationUI NavigationUI = NavigationUIFactory.get(driver);
+
+        if (Platform.getInstance().isMw())
+        {
+            NavigationUI.openNavigationMenu();
+            AuthorizationPageObject Auth = new AuthorizationPageObject(driver);
+            Auth.clickAuthButton();
+            Auth.enterLoginData(login, password);
+            Auth.submitForm();
+            Thread.sleep(1000);
+            ArticlePageObject.waitForTitleElement();
+            assertEquals("We are not at the same page after login",
+                    searchRequest,
+                    ArticlePageObject.getArticleTitle());
+            ArticlePageObject.addArticleToMyList();
+        }
+        ArticlePageObject.closeArticle();
+        NavigationUI.openNavigationMenu();
         NavigationUI.openMyList();
         Thread.sleep(1000);  // ВТОРОЙ слип, без этого иногда тапает не по папке, а по кнопке My list
         MyListPageObject MyListPageObject = MyListPageObjectFactory.get(driver);
+
         if (Platform.getInstance().isAndroid())
         {
             MyListPageObject.openMyFolderByName(folderName);
