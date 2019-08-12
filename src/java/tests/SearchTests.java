@@ -59,7 +59,7 @@ public class SearchTests extends CoreTestCase
 
 
     @Test
-    public void testSearchAndValidateResults()
+    public void testSearchAndValidateResults() //Ex18
     {
         String searchRequest = "Python";
         SearchPageObject SearchPageObject = SearchPageObjectFactory.get(driver);
