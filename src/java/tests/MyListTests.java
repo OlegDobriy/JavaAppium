@@ -23,7 +23,7 @@ public class MyListTests extends CoreTestCase
 
 
     @Test
-    public void testAddFirstArticleToListAndDelete() throws InterruptedException
+    public void testAddFirstArticleToListAndDelete() throws InterruptedException //Ex17
     {
         String
                 searchRequest = "Java",
@@ -42,7 +42,7 @@ public class MyListTests extends CoreTestCase
 
         if (Platform.getInstance().isIOS())
         {
-            ArticlePageObject.addFirstArticleToMyList();
+            ArticlePageObject.addArticleToMyList();
         }
 
         NavigationUI NavigationUI = NavigationUIFactory.get(driver);
@@ -79,31 +79,47 @@ public class MyListTests extends CoreTestCase
     public void testAddTwoArticlesToListAndDeleteOne() throws InterruptedException  // ex8, ex11
     {
         String
-                SearchRequest = "Java",
+                searchRequest = "Java",
                 firstResult = "Java (programming language)",
                 secondResult = "JavaScript",
                 folderName = "testAddTwoArticlesToListAndDeleteOne";
         // first article
         SearchPageObject SearchPageObject = SearchPageObjectFactory.get(driver);
         SearchPageObject.initSearchInput();
-        SearchPageObject.fillSearchField(SearchRequest);
+        SearchPageObject.fillSearchField(searchRequest);
         SearchPageObject.waitForSearchResultByTitle(firstResult);
         SearchPageObject.waitForSearchResultAndClick(firstResult);
         ArticlePageObject ArticlePageObject = ArticlePageObjectFactory.get(driver);
+        NavigationUI NavigationUI = NavigationUIFactory.get(driver);
         if (Platform.getInstance().isAndroid())
         {
             ArticlePageObject.createListAndAddArticle(folderName);
         }
-        else
+
+        if (Platform.getInstance().isIOS())
         {
-            ArticlePageObject.addFirstArticleToMyList();
+            ArticlePageObject.addArticleToMyList();
+        }
+        if (Platform.getInstance().isMw())
+        {
+            NavigationUI.openNavigationMenu();
+            AuthorizationPageObject Auth = new AuthorizationPageObject(driver);
+            Auth.clickAuthButton();
+            Auth.enterLoginData(login, password);
+            Auth.submitForm();
+            Thread.sleep(1000);
+            ArticlePageObject.waitForTitleElement();
+            assertEquals("We are not at the same page after login",
+                    firstResult,
+                    ArticlePageObject.getArticleTitle());
+            ArticlePageObject.addArticleToMyList();
         }
         ArticlePageObject.closeArticle();
         // second article
         SearchPageObject.initSearchInput();
-        if (Platform.getInstance().isAndroid())
+        if (Platform.getInstance().isAndroid() || Platform.getInstance().isMw())
         {
-            SearchPageObject.fillSearchField(SearchRequest);
+            SearchPageObject.fillSearchField(searchRequest);
         }
         SearchPageObject.waitForSearchResultByTitle(secondResult);
         SearchPageObject.waitForSearchResultAndClick(secondResult);
@@ -113,11 +129,12 @@ public class MyListTests extends CoreTestCase
         }
         else
         {
+
             ArticlePageObject.addArticleToMyList();
         }
         ArticlePageObject.closeArticle();
         // my list
-        NavigationUI NavigationUI = NavigationUIFactory.get(driver);
+        NavigationUI.openNavigationMenu();
         NavigationUI.openMyList();
         MyListPageObject MyListPageObject = MyListPageObjectFactory.get(driver);
         if (Platform.getInstance().isAndroid())
