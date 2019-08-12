@@ -57,7 +57,7 @@ abstract public class MyListPageObject extends MainPageObject
         );
     }
 
-    public void swipeArticleToDelete(String articleTitle)  // в папке выводится title фактического результата поиска, а не запрос
+    public void swipeArticleToDelete(String articleTitle) throws InterruptedException  // в папке выводится title фактического результата поиска, а не запрос
     {
         this.waitForArticleToAppearInMyLists(articleTitle);
         String articleXpath = getArticleXpathInMyLists(articleTitle);
@@ -71,6 +71,7 @@ abstract public class MyListPageObject extends MainPageObject
         }
         else {
             String removeLocator = getRemoveButtonByTitle(articleTitle);
+            Thread.sleep(100);
             this.waitForElementAndClick(removeLocator, "Cannot find 'Remove article from my list' button");
         }
 

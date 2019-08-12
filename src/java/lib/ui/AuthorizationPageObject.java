@@ -19,9 +19,8 @@ public class AuthorizationPageObject extends MainPageObject
 
     public void clickAuthButton() throws InterruptedException
     {
-        this.checkElementIsMoving(LOGIN_BUTTON);
         this.waitForElementPresent(LOGIN_BUTTON, "Cannot find 'Log in' button");
-        this.waitForElementAndClick(LOGIN_BUTTON, "Cannot click 'Log in' button");
+        this.tryClickElementWithFewAttempts(LOGIN_BUTTON, "Cannot click 'Log in' button", 10);
     }
 
 

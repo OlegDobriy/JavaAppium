@@ -137,13 +137,14 @@ abstract public class ArticlePageObject extends MainPageObject
     }
 
 
-    public void closeArticle()
+    public void closeArticle() throws InterruptedException
     {
         if (Platform.getInstance().isIOS() || Platform.getInstance().isAndroid())
         {
-            this.waitForElementAndClick(
+            this.tryClickElementWithFewAttempts(
                     CLOSE_ARTICLE_BUTTON,
-                    "Cannot find the 'Close' button"
+                    "Cannot find the 'Close' button",
+                    5
             );
         }
         else
@@ -175,6 +176,7 @@ abstract public class ArticlePageObject extends MainPageObject
     {
         if (Platform.getInstance().isMw())
         {
+            this.checkElementIsMoving(TITLE);
             this.removeArticleFromListIfItAdded();
         }
 
@@ -182,8 +184,18 @@ abstract public class ArticlePageObject extends MainPageObject
         {
             this.checkElementIsMoving(ADD_TO_LIST_BUTTON);
         }
-
-        this.waitForElementAndClick(ADD_TO_LIST_BUTTON, "Cannot find 'Add to list' button");
+        this.tryClickElementWithFewAttempts(ADD_TO_LIST_BUTTON, "Cannot find 'Add to list' button", 10);
+        if (Platform.getInstance().isIOS())
+        {
+            try
+            {
+                this.waitForElementAndClick("id:places auth close", "Cannot close window");
+            }
+            catch (Exception e)
+            {
+                return;
+            }
+        }
     }
 
 
